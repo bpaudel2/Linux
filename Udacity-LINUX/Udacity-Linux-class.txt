@@ -1,0 +1,103 @@
+- If you type single quote and press enter, terminal will wait for you to type another single quote.
+- exit command will log you out. 
+- ls = list of items.
+- curl http://udacity.github.io/ud595-shell/stuff.zip -o things.zip 
+  download the files from internet and gives it name thing.zip.
+- cowsay is a program that can be used with linux.
+- date command gives you date
+- expr 4 + 5 gives 9
+- echo You Rock gives You Rock
+- uname gives linux
+- uname -a gives information about operating systme
+- hostname gives username-machine 
+- host udacity.com gives host information about Udacity.com
+- bash --version gives info about bash
+- history gives you the history of last used command.
+- uptime gives information about computer uptime.
+- In order to see ' in terminal, use skip character \
+
+Lesson 2:
+Files in Linux:
+Linux is very flexible about filename. The files system does not require that file have extension at the end of their
+filename.arrow 
+Using up arrow keys, you will be able to see recently used command but you can also
+use 
+history //to see history of command 
+Ctrl + R //Reverse-i-search: to search recently used command.
+unzip filename //to unzip the zipped file
+cat file1 file2 //to read file
+tab multiple times auto complete the command
+wc filename // word count, it tells how many lines, words and bytes in a file
+diff file1 file2 // gives the different between two files
+man command_name //to learn more about command
+ls -a // to list all the files
+ls -l // to see more information about file (long listing)
+rm -rf // recursive deleting with forcefully
+ping 8.8.8.8//used to test whether another machine in internet is alive.
+sort // sort the things you provide, type sort and provide things to be sorted, at the end provide Ctrl+D (END OF FILE CHARACTER)
+bc // a basic calculators 
+less filename // display file content, arrow keys to scroll up and down
+    use D key or space bar for scroll up and down
+    scroll one page at a time by U key
+    skip last line of file using > 
+    < to go to first line of file
+    enter line number to go to specific line
+    type /searchString to search for that String and press enter to execute the search, find next occurence of search by pressing n key, to go previous occurence use N, searches are case sensitive,
+    less cheat sheet http://sheet.shiar.nl/less
+    Intor to RegEx: http://codular.com/regex 
+
+Nano // to edit file in terminal.
+    move around with arrow key, at the buttom there are some command
+
+
+Files and Directories:
+Files name in Linux are flexible. You can spaces, dot and everything except /.
+If there are spaces in line name use either single quote, or back slash(\) skipping character.
+Linux uses forward slash and Windows uses back slash.
+workig directory: pwd //print working directory
+cd //to change working directory
+cd .. //to up the directory
+Top most directory in filesystem is root. We denote it with slash(/)
+Absolute path: full path begining with slash
+Relative path: path from current working directory.
+. refers to current directory.
+.. points to parent directory.
+~ is abbreviation for your home directory. Exp ~/desktop/
+cd with no arguments will take you to your home directory
+
+Moving and Copying Files:
+mv //move files, or rename files
+cp //to copy files
+mkdir //to create new Directories
+rmdir //to delete the directoryy 
+rm -r //if directory has files in it
+
+Globbing
+    matching files by name. pattern matching file for filename.
+    ls *html //to see all html files. * matches zero or many characters
+    ls app.{css,html} //either app.css or app.html
+    ? matches any one character
+    [abcde] matches any one of the character inside square bracket.
+    Filename in Linux are case sensitive. 
+    ls *{jpg,png} is equivalent to ls *jpg *png
+    echo prints on the command line. 
+    echo Short names: 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  

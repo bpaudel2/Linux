@@ -1,0 +1,445 @@
+...LINUX FILE SYSTEM...
+
+Free as in Beer
+    Free for you to use, does not get to see underlying source code or modify
+    for your purpose.
+
+Free as in Speech
+    Right with your software, run software you like and see how the software works,
+    redistribute the software, improved on or modify the software
+
+Linux is popular because of Free as in Speech.
+/home : has directories for all the users.
+cd / : to go to root directory. Here we have some of the very important 
+    files and directories. /home is where all directories of all the users live.
+    /etc is where configuration lives (web and database servers)
+    /var is for variable files. These are files you expect to grow or change in size over time.
+        You will find system and application log within this directory.
+    /bin where executable binaries are stored that are accessible by all the users.
+        For example ls command.
+    /sbin is very similar to bin except that these binaries are to only be used by root user
+        for system admin, system management and maintenance purposes.
+    /lib is library that supports the binaries that are located around the system.
+    /usr for user program. This is much like /bin. Only difference is that binaries within bin are
+        required for system maintenance and boot-up purposes and binaries in /usr are not required for that.
+
+$PATH:
+This is how linux understands path.
+echo $PATH :to see all the directories within path. This way you can use command without giving full path.
+            These are separated with :. When you type command, linux search your command within these 
+            directories.
+
+How to add a directory to the PATH:
+https://askubuntu.com/questions/60218/how-to-add-a-directory-to-the-path
+1)The recommended place to define permanent, system-wide environment variables applying to all users is in:
+
+/etc/environment
+
+(which is where the default PATH is defined)
+
+This will work in desktop or console, gnome-terminal or TTY, rain or shine ;)
+
+    To edit, press Alt+F2 and type:
+
+    gksudo gedit /etc/environment
+
+    (or open the file using sudo in your favorite text editor)
+
+To effect changes, run . /etc/environment. Since this file is just a simple script it will run and assign the new path to the PATH environment variable. To check run env and see the PATH value in the listing.
+
+Related:
+
+    https://help.ubuntu.com/community/EnvironmentVariables
+
+2) For persistent environment variables available to particular users only. I highly recommend Ubuntu official documentation.
+
+https://help.ubuntu.com/community/EnvironmentVariables
+
+Referring to documentation above, I have setup my Android SDK path-tools by:
+
+    creating ~/.pam_environment file in home directory.
+    the content of which is PATH DEFAULT=${PATH}:~/android-sdk-linux/tools.
+    additional custom user path can be added by separating paths with colon (:).
+    this requires re-login, which means you need to log-out and log-in back to desktop environment.
+
+3) Using ~/.profile to set $PATH
+A path set in .bash_profile will only be set in a bash login shell (bash -l). If you put your path in .profile it will be available to your complete desktop session. That means even metacity will use it.
+For example ~/.profile:
+
+if [ -d "$HOME/bin" ] ; then
+  PATH="$PATH:$HOME/bin"
+fi
+
+Btw, you can check the PATH variable of a process by looking at its environment in /proc/[pid]/environ (replace [pid] with the number from ps axf). E.g. use grep -z "^PATH" /proc/[pid]/environ
+Note:
+bash as a login shell doesn't parse .profile if either .bash_profile or .bash_login exists. From man bash :
+
+    it looks for ~/.bash_profile, ~/.bash_login, and ~/.profile, in that order, and reads and executes commands from the first one that exists and is readable.
+
+See the answers below for information about .pam_environment, or .bashrc for interactive non-login shells, or set the value globally for all users by putting a script into /etc/profile.d/ or use /etc/X11/Xsession.d/ to affect the display managers session.
+
+
+
+
+
+
+
+Bash Startup Files:
+
+If any of the Startup files exists but can not re read, bash reports an error. 
+
+-- Invoked as an interactive login shell, or with --login
+    When bash is invoked as an interactive login shell, or as a non interactive shell with 
+    --login option, it first reads and executes commands from 
+    /etc/profile if that file exists.
+    After that, it looks for ~/.bash-profile, ~/bash_login, and ~/.profile, in 
+    that order, and reads and executes commands from the first one that exists and is readable.
+    The --noprofile option may be used when the shell is started to inhibit this behaviour.
+    When interactive login shell exits, or a non-interactive login shell executes the exit builtin command,
+    Bash reads and executes commands from the file ~/.bash_logout, if it exists.
+-- Invoked as an interactive non-login shell:
+    When an interactive shell that is not a login shell is started, Bash reads and executes commands from ~/.bashrc, if that exists.
+    This may be inhibited by using the --norc option. The --rcfile file option will force Bash to read and execute commands from file instead of ~/.bashrc
+    So, typically, your ~/.bash_profile contains the line.
+    
+    if [ -f ~/.bashrc ]; then .~/.bashrc; fi
+    
+    after (or before) any login-specific initializations.
+-- Invoked non-interactively
+    When Bash i started non-interactively, to run a script, for example, it looks for the variable BASH_ENV in the enviroment, 
+    expands its value if it appears there, and uses the expanded value as the name of a file to read and execute. Bash behaves as
+    if the following command were executed.
+
+    if [ -n "$BASH_ENV" ]; then . "$BASH"; fi
+    
+    but the value of the PATH variable is not used to search for filename.
+-- Invoked with name sh
+    If Bash is invoked with the name sh, it tries to mimic the startup behaviour of historical versions of sh as closely as possible,
+    while conforming to the POSIX standard as well. When invoked as an interactive shell with the name sh, Bash looks for the variable ENV,
+    expands its value if it is defined, and uses the expanded value as the name of a file to read and execute. Since a shell invoked as sh 
+    does not attempt to read and execute commands from any other startup files, the --rcfile option has no effect. A non-interactive shell 
+    invoked with the name sh does not attempt to read any other startup files.
+
+    When invoked as sh, Bash enters POSIX mode after the startup files are read. 
+-- Invoked in POSIX mode:
+    When Bash is started in POSIX mode, as with the --posix command line option, it follows the POSIX standard for startup files. In this mode,
+    interactive shells expand the ENV variable and commands are read and executed from the file whose name is the expanded value. No other startup files are read. 
+-- Invoked by remote shell daemon:
+    Bash attempts to determine when it is being run with its standard input connected to a network connection, as when executed by the remote shell daemon, 
+    usually rshd, or the secure shell daemon sshd. If Bash determines it is being run in this fashion, it reads and executes commands from ~/.bashrc, if 
+    that file exists and is readable. It will not do this if invoked as sh. The --norc option may be used to inhibit this behavior, and the --rcfile option 
+    may be used to force another file to be read, but neither rshd nor sshd generally invoke the shell with those options or allow them to be specified. 
+-- Invoked with unequal effective and real UID/GIDs
+    If Bash is started with the effective user (group) id not equal to the real user (group) id, and the -p option is not supplied, no startup files are read, 
+    shell functions are not inherited from the environment, the SHELLOPTS, BASHOPTS, CDPATH, and GLOBIGNORE variables, if they appear in the environment, are
+    ignored, and the effective user id is set to the real user id. If the -p option is supplied at invocation, the startup behavior is the same, but the effective
+    user id is not reset. 
+
+
+
+LINUX Security:
+1) Rule of least privilege. That means user or an application has enough permission to do its job, nothing extra.
+2) That's why when you were logged in your linux machine as a standard user.
+3) username root is superuser and is super powerful. It is very common to disable the ability to log in as root instead
+   we login as user we create and then use individual commands to login as root.
+4) sudo to run as root.
+
+sudo vs su:
+Best practice is not to use SU command because you don't have to switch entire working context to root just to run couple 
+or few commands.  
+
+Package Source Lists:
+package source list:
+all of your available package source list are listed in this file.
+>> cat /etc/apt/sources.list
+This is what we use to update and install softwares.
+Updating available package lists: 
+One way to ensure your system is secure is by updating software often with new releases.
+Most linux distributions do not auto-update the software installed on the system. So, you have to
+do this on your own and test your app to make sure any recent update 
+don't break your application.
+
+1) The first step to upgrading your installed software is to update your package source list.
+   You can do this by:
+   sudo apt-get update
+   The update command run through all of the repository we saw within /etc/apt/sources.list
+   and check to see what all softwares are available and what those versions numbers are. This 
+   command does not actually peform any changes to the software on your system. It just makes sure 
+   your system is aware of the latest information stored within all of these repostories that you're
+   making use of. 
+2) Once the system is aware of latest softwares, we can update them using command 
+    sudo apt-get upgrade
+    After few seconds, it will present list of everything that's going to change on your system. 
+    And ask you if you want to continue (yes/no)
+    You can review the changes and accept or reject. For the system in production, take enough time to 
+    review changes and actually test those changes in staging before accepting upgrade in production.
+3) The apt-get application is your main interface to a ton of package related function. It can install packages,
+    remove packages. Find more info using
+    man apt-get
+4) Removing packages that no longer required using autoremove.
+    sudo apt-get autoremove
+5) Using apt-get to install new softwares
+    sudo apt-get install finger //finger is a name of software
+    Finger is a software that displays various information about user and displays in easy to read format.
+    >> finger //outputs information about all of the user currently logged in to the system. 
+    >> finger username //to see additional information about specific user
+So, where is finger retrieving all the information about these users. Much of these 
+information are found within the file /etc/passwd 
+cat /etc/passwd 
+-- Each line within this file is entry for single user.
+-- Each entry has number of fields separated by : character. 
+-- username:password:Userid:groupid: description about the user: home directory: command/shell
+-- Second field used to store encrypted password but not anymore. Now, there is will be character (x) which is ignored.
+-- userid: 0 is root. 1-99 are for predefined users, and 100-999 are for other system accounts
+-- groupid: primary group id, stored in /etc/group
+
+Intro to User Management:
+sudo adduser student //to create new user named student and provide the information needed.
+Connecting as the New User
+>> ssh student@127.0.0.1 -p 2222 //connecting to server ssh(application used to remotely connect to server), 127.0.0.1 is IP address we want to connect to (localhost0), student is user, -p tells to connect using 2222 port.
+>> login //to login
+>> su student //switch user to student
+>> sudo -u username //to run a single command as another user.
+>> currently studeent user can not use sudo command and we're going to fix that here.
+sudent@b1k-Inspiron-3531:/$ sudo cat /etc/passwd
+[sudo] password for student:
+student is not in sudoers file. The incident will be reported.
+ 
+The list of sudoers users are in /etc/sudoers file.
+>> sudo cat /etc/sudoers
+At the buttom of this file, it says 
+#includedir /etc/sudoers.d 
+which means you can add additional sudoers users in sudoers.d directory. Because this sudoers file can be 
+modified in system update. So, it is safe to include your sudoers in sudoers.d .
+sudo ls /etc/sudoers.d
+In order to give student sudo access.
+>> sudo nano /etc/sudoers.d/student
+>> student contents
+student ALL=(ALL) NOPASSWD:ALL
+save and close it. Now, student has sudo access.
+
+Sudoers: https://help.ubuntu.com/community/Sudoers
+The /etc/sudoers file controls who can run what commands as what users on what machines and can also control special things 
+such as whether you need a password for a paticular commands. 
+The file is composed of aliases (basically variables) and user specification (which control who can run what)
+
+Editing the sudoers file:
+The default editor for visudo has changed to vi. To change this behaviour, 
+open your ~./bashrc file, and append the line to the buttom of the file.
+export EDITOR="nano"
+If you wish to use another text editor, replace nano with any text editor of your choice. Run source ~/.bashrc to ensure 
+the changes you made have taken effect.
+Now lunch visudo with 
+sudo -E visudo 
+and put in
+Defaults editor=/usr/bin/nano.
+So, the top of the file should now look like this.
+Defaults editor=/usr/bin/nano
+Defaults env_reset
+save and close.
+
+Aliases: 
+There are four kinds of aliases: User_Alias, Runas_Alias, Host_Alias and Command_Alias. Each alias is of the format
+    Alias_type NAME = item1, item2,...
+Where Alias_type is one of four alias type. A NAME is string of uppercase letters, numbers and underscores. 
+You can put several aliases of the same type on one line like this.
+    Alias_type NAME1 = item1, item2: NAME2=item3
+You can include other aliases in an alias specification provieded they would normally fit there. For example,
+you can use a user alias wherever you would normally expect to see a list of users (for example in a user or runas alias).  
+There are also built in aliases called ALL which match everything where they are used. 
+
+User Aliases:
+
+User Aliases are used to specify group of users. You can specify usernames, system groups(prefixed by a %)
+and netgroups (prefixed by a +) as follows: 
+
+ # Everybody in the system group "admin" is covered by the alias ADMINS
+ User_Alias ADMINS = %admin
+ # The users "tom", "dick", and "harry" are covered by the USERS alias
+ User_Alias USERS = tom, dick, harry
+ # The users "tom" and "mary" are in the WEBMASTERS alias
+ User_Alias WEBMASTERS = tom, mary
+ # You can also use ! to exclude users from an alias
+ # This matches anybody in the USERS alias who isn't in WEBMASTERS or ADMINS aliases
+ User_Alias LIMITED_USERS = USERS, !WEBMASTERS, !ADMINS
+
+Runas Aliases:
+Runas Aliases are almost the same as user aliases but you are allowed to specify user by uid's. 
+his is helpful as usernames and groups are matched as strings so two users with the same uid but 
+different usernames will not be matched by entering a single username but can be matched with a uid. For example: 
+
+ # UID 0 is normally used for root
+ # Note the hash (#) on the following line indicates a uid, not a comment.
+ Runas_Alias ROOT = #0
+ # This is for all the admin users similar to the User_Alias of ADMINS set earlier 
+ # with the addition of "root"
+ Runas_Alias ADMINS = %admin, root
+
+ Host Aliases:
+ A host alias is a list of hostname, ip addresses, networks and netgroups (prefixed with a +). If you do not 
+ specify a netmask with a network the netmask of the hosts ethernet interface(s) will be used when matching. 
+
+ # This is all the servers
+ Host_Alias SERVERS = 192.168.0.1, 192.168.0.2, server1
+ # This is the whole network
+ Host_Alias NETWORK = 192.168.0.0/255.255.255.0
+ # And this is every machine in the network that is not a server
+ Host_Alias WORKSTATIONS = NETWORK, !SERVER
+ # This could have been done in one step with 
+ # Host_Alias WORKSTATIONS = 192.168.0.0/255.255.255.0, !SERVERS
+ # but I think this method is clearer.
+
+ Command Aliases:
+ Command aliases are lists of commands and directories. You can use this to specify a group of commands.
+ If you specify directory, it will include any file within that directory but not in subdirectories.
+ The special command "sudoedit" allows users to run sudo with -e flag or as the command sudoed it. 
+
+ # All the shutdown commands
+ Cmnd_Alias SHUTDOWN_CMDS = /sbin/poweroff, /sbin/reboot, /sbin/halt
+ # Printing commands
+ Cmnd_Alias PRINTING_CMDS = /usr/sbin/lpc, /usr/sbin/lprm
+ # Admin commands
+ Cmnd_Alias ADMIN_CMDS = /usr/sbin/passwd, /usr/sbin/useradd, /usr/sbin/userdel, /usr/sbin/usermod, /usr/sbin/visudo
+ # Web commands
+ Cmnd_Alias WEB_CMDS = /etc/init.d/apache2
+
+ Forcing Password Expiration:
+ sudo passwd -e student //to force the student user to reset their password the next time they login.
+
+
+Anoer Authentication Method:
+Key based Authentication
+    With the combination of public and private key. Everybody will know the public key. But only user knows the private key. 
+    Public key encryption can be used to authencticate client with a server. The server will send a random message to client.
+    The client will encrypt that message with their private key and then send that encrypted message to the server. The server
+    will decrypt that message using their public key. If the value equals the same value they sent, then everything checks out 
+    and the client has authenticated. 
+
+Generating Key Pairs:
+We will generate the key pairs in our local machine, not on our server. Remember, never ever share your private key with anyone. 
+For this reason, you will always generate your private key locally. If you were to generate the key pairs in server, you can not
+claim that the private key has always been private. We use application,
+ssh-keygen to generate key pairs. You have to give filename in order to generate key pairs.
+
+>> ssh-keygen //and then provide filename and passphrase. Here passphrase is used as extra security. Even people get these files, 
+they won't be ale to use it without passphrase. This will generate one public file and one private file. Public file will remain 
+in server to enable to enable key based authenctication.
+ssh-keygen supports many key types (DSA, ECDSA, ED25519, RSA). RSA is a default type. 
+Installing a public key:
+-- Login as a student.
+-- Create directory /home/student/.ssh
+-- Create file called authorized_key. This file stored all of the keys that this account can use authentication as one key per line.
+-- Now the paste the content of your recently generated public key into authorized_key file and save it.
+-- Now set file permission for security.
+-- chmod 700 .ssh
+-- chmod 644 .ssh/authorized_key
+-- We're done.
+-- Now, we can login like this.
+-- ssh student@127.0.0.1 ~p 2222 -i ~/.ssh/authorized_key //Now, we don't have to provide password while logging in.
+
+Forcing Key Based Authentication:
+We need to edit /etc/ssh/sshd_config file.
+Simply find line called "passwordAuthentication yes" and change that to "passwordAuthentication no". 
+Finally, restart the service to put changes in action.
+>> sudo service ssh restart
+
+-- SETTING UP YOUR UBUNTU MACHINE FOR SSH
+https://dev.to/zduey/how-to-set-up-an-ssh-server-on-a-home-computer
+SSH stands for "secure socket shell" and is what will allow us to establish a secure connection between two computers. 
+We need openssh-server application, which will allow us to run as SSH server on your machine that will handle requests
+for access to the host computer from other devices.
+>> sudo apt-get upgrade
+>> sudo apt-get install openssh-client
+>> sudo apt-get install openssh-server
+>> ps -A|grep ssh OR ps -A|grep ssh
+>> ssh localhost
+>> ifconfig
+>> NAT and Public/Private IP address
+>> Setting up PORT and PORT Forwarding on your router.
+
+Introduction to File Permission:
+For example, .bashrc file in user home directory.
+rw-r--r-- for owner, group and everyone else.
+Owners and groups
+owner and groups
+username and groupname in : ll command,
+root and root. 
+Octal Permission:
+r = 4, w =2, x =1
+for read and execute = 5
+rw- r-- r-- : 644
+chown filename //to change the group
+chgrp filename //to change the group
+~/.bash_history file has the history of recent run bash command. 
+touch filename //to create a file.
+
+Intro to Ports:
+How does server know which application is in charge of handling different type of request. 
+Each application are configured to respond to requests destined for specific port. Example, web 
+server responds on port 80. We can control which ports our server is allowed to accept requests for 
+using an application called firewall. 
+HTTP: 80, HTTPS: 443
+SSH: 22, FTP:21, POP3:110, SMTP: 25
+
+We should only listen on port for our application to function correctly. 
+
+
+Intro to UFW (Firewall):
+>> sudo ufw status
+>> sudo ufw default deny incoming //to reject everything
+>> sudo ufw default allow outgoing //to allow all outgoing connection
+>> sudo ufw status
+>> sudo ufw allow ssh //to allow ssh connection
+>> sudo ufw allow 2222/tcp //to allow tcp(ssh) connection via port 2222
+>> sudo ufw allow www //to allow HTTP server
+>> sudo ufw enable //to enable firewall
+Be carefull before running above command because if you might not be able to ssh to your system, if you mess up the 
+configuration for firewall. 
+>> sudo ufw status //to see all the firewall rules.
+
+Guide of setting up some of the servers:
+LAMP Stack (Linux, Apache, MySQL, PHP): https://www.digitalocean.com/community/tutorials/how-to-install-linux-apache-mysql-php-lamp-stack-on-ubuntu-14-04
+LEMP Stack (Linux, nginx, MySQL, PHP) : https://www.digitalocean.com/community/tutorials/how-to-install-linux-nginx-mysql-php-lemp-stack-on-ubuntu-14-04
+PEPS Mail and File Storage: https://www.digitalocean.com/community/tutorials/how-to-run-your-own-mail-server-and-file-storage-with-peps-on-ubuntu-14-04
+Mail-in-a-Box Email Server: https://www.digitalocean.com/community/tutorials/how-to-run-your-own-mail-server-and-file-storage-with-peps-on-ubuntu-14-04
+Lita IRC Chat Bot: https://www.digitalocean.com/community/tutorials/how-to-install-the-lita-chat-bot-for-irc-on-ubuntu-14-04
+
+
+
+DISCOVERING PACKAGES:Finding packages you looking for here.
+https://packages.ubuntu.com/ 
+https://packages.ubuntu.com/trusty/
+Search for: Apache HTTP Server (apache2), PostgreSQL (postgresql), Memcache(memcached).
+
+
+WEB APPLICATION SERVERS:
+
+USER --->Firewal--->Apache--->Python-->PostgreSQL
+First install using
+>> sudo apt-get install apache2
+Apache, by default, serves its files from the /var/www/html directory. If you explore this directory,
+you will find index.html file. 
+>> sudo apt-get install libapache2-mod-wsgi //to install wsgi (request to an application handler)
+Now, you can configure apache to handle requests using WSGI module by editing the following file.
+/etc/apache2/sites-enabled/000-default.conf 
+For now, add the following line at the end of the <VirtualHost *:80> block, right before the closing </VirtualHost> line: WSGIScriptAlias / /var/www/html/myapp.wsgi
+
+Finally, restart Apache with the sudo apache2ctl restart command.
+
+WSGI is a specification that describes how a web server communicates with web applications. Most if not all Python web frameworks are WSGI
+compliant, including Flask and Django; but to quickly test if you have your Apache Configuration correct.
+You just defined the name of the file you need to write within your Apache configuration by using the WSGIScriptAlias directive. Despite having the extension .wsgi, 
+these are just Python applications. Create the /var/www/html/myapp.wsgi file using the command sudo nano /var/www/html/myapp.wsgi. Within this file, write the following application:
+
+def application(environ, start_response):
+    status = '200 OK'
+    output = 'Hello Udacity!'
+
+    response_headers = [('Content-type', 'text/plain'), ('Content-Length', str(len(output)))]
+    start_response(status, response_headers)
+
+    return [output]
+We will now install PostgreSQL to server your data using the command.
+>> sudo apt-get install PostgreSQL
+Update /var/www/html/myapp.wsgi application so that it successfully connects to your database, queries a table
+for data and presents that piece of data rather thant the text hello world. 
